@@ -8,6 +8,7 @@
 # Variables locales o sensibles
 *.tfvars
 *.tfvars.json
+.venv
 .env
 .env.*
 

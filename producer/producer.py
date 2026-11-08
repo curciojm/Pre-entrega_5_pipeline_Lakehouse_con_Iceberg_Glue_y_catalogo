@@ -9,10 +9,6 @@ from botocore.exceptions import BotoCoreError, ClientError
 from datetime import datetime, timezone
 
 
-# --------------------------------------------------
-# Configuration
-# --------------------------------------------------
-
 AWS_REGION = "us-east-2"
 STREAM_NAME = "dev-kinesis-lakehouse-stream"
 
@@ -27,19 +23,10 @@ EVENTS_PER_BATCH = 20
 INTERVAL_SECONDS = 2
 
 
-# --------------------------------------------------
-# Kinesis client
-# --------------------------------------------------
-
 kinesis = boto3.client(
     "kinesis",
     region_name=AWS_REGION
 )
-
-
-# --------------------------------------------------
-# Event generation
-# --------------------------------------------------
 
 def generate_quote(ticker, base_price):
     """Generate one stock quote event."""
@@ -58,11 +45,6 @@ def generate_quote(ticker, base_price):
         "PRICE": price,
         "EVENT_TIME": event_time
     }
-
-
-# --------------------------------------------------
-# Send events to Kinesis
-# --------------------------------------------------
 
 def send_batch():
     records = []
@@ -99,10 +81,6 @@ def send_batch():
                     f"{result.get('ErrorMessage', '')}"
                 )
 
-
-# --------------------------------------------------
-# Main loop
-# --------------------------------------------------
 
 def main():
     print(f"Productor iniciado: {STREAM_NAME}")

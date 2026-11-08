@@ -27,7 +27,6 @@ public class IcebergTableManager {
             String databaseName
     ) throws Exception {
 
-        // 1. Configuración del catálogo
         Map<String, String> properties = new HashMap<>();
 
         properties.put(
@@ -44,7 +43,6 @@ public class IcebergTableManager {
 
         Configuration hadoopConf = new Configuration();
 
-        // 2. Crear el loader del catálogo Glue
         CatalogLoader catalogLoader = CatalogLoader.custom(
             "glue",
             properties,
@@ -56,7 +54,6 @@ public class IcebergTableManager {
 
         try {
 
-            // 3. Identificar la base y la tabla
             Namespace namespace = Namespace.of(databaseName);
 
             TableIdentifier tableIdentifier = TableIdentifier.of(
@@ -64,7 +61,6 @@ public class IcebergTableManager {
                 TABLE_NAME
             );
 
-            // 4. Crear la tabla si no existe
             if (!catalog.tableExists(tableIdentifier)) {
 
                 Schema schema = new Schema(

@@ -13,33 +13,24 @@ public class StockAggregateFunction
 
     @Override
     public StockAccumulator createAccumulator() {
-        // acumulador para prcesar
         return new StockAccumulator();
     }
 
     @Override
-    // fijate que acumula los otros archivos
-    // add cada vez que llega una cotizacion actualiza el acumulador
     public StockAccumulator add(
-        // quote
-        // SQ: TipoDeDato Q: nombreDeVariable que damos dentro del objeto
             StockQuote quote,
             StockAccumulator accumulator) {
 
-        // Store the ticker
         accumulator.setTicker(quote.getTicker());
 
-        // Update trade count
         accumulator.setTradeCount(
                 accumulator.getTradeCount() + 1
         );
 
-        // Update sum of prices
         accumulator.setSumPrice(
                 accumulator.getSumPrice() + quote.getPrice()
         );
 
-        // Update maximum price
         accumulator.setMaxPrice(
                 Math.max(
                         accumulator.getMaxPrice(),
@@ -47,7 +38,6 @@ public class StockAggregateFunction
                 )
         );
 
-        // Update minimum price
         accumulator.setMinPrice(
                 Math.min(
                         accumulator.getMinPrice(),

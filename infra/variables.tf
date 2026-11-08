@@ -7,7 +7,6 @@ variable "aws_region" {
 variable "environment" {
   description = "Entorno de despliegue."
   type        = string
-  # default son etiquetas que se aplican automáticamente a los recursos compatibles
   default = "dev"
 }
 

@@ -1,12 +1,7 @@
-// Este archivo representa el resultado de las agregaciones que Flink calcula para cada ticker durante una ventana de un minuto.
-// estamos definiendo la estructura donde guardaremos los resultados. El cálculo estará en otro componente
-
-
 package com.dataeng.lakehouse;
 
 import java.io.Serializable;
-// es una interfaz de Java que permite que un objeto pueda convertirse 
-// en una secuencia de bytes para poder almacenarse, transmitirse o reconstruirse posteriormente
+
 public class StockAggregate implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -20,7 +15,6 @@ public class StockAggregate implements Serializable {
     private double maxPrice;
     private double minPrice;
 
-    // Required by Flink for POJO serialization
     public StockAggregate() {
     }
 

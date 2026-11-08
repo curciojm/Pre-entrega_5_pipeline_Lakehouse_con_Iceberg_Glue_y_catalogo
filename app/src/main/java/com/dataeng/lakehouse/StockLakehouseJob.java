@@ -26,14 +26,11 @@ public class StockLakehouseJob {
 
     public static void main(String[] args) throws Exception {
 
-        // 1. Crear el entorno de ejecución de Flink
         StreamExecutionEnvironment env =
                 StreamExecutionEnvironment.getExecutionEnvironment();
 
-        // 2. Configurar checkpoints
         env.enableCheckpointing(60_000L);
 
-        // 3. Obtener las propiedades de la aplicación
         Map<String, Properties> applicationProperties =
                 KinesisAnalyticsRuntime.getApplicationProperties();
 
@@ -46,7 +43,6 @@ public class StockLakehouseJob {
             );
         }
 
-        // 4. Obtener los parámetros de AWS
         String streamArn = getRequiredProperty(
                 appConfig, "KINESIS_STREAM_ARN"
         );
@@ -63,7 +59,6 @@ public class StockLakehouseJob {
                 appConfig, "GLUE_DATABASE"
         );
 
-        // 5. Configurar la fuente Kinesis
         Configuration sourceConfig = new Configuration();
 
         sourceConfig.set(
@@ -78,7 +73,6 @@ public class StockLakehouseJob {
                         .setDeserializationSchema(new SimpleStringSchema())
                         .build();
 
-        // 6. Leer los eventos desde Kinesis
         DataStream<String> rawEvents =
                 env.fromSource(
                         kinesisSource,
@@ -86,14 +80,11 @@ public class StockLakehouseJob {
                         "Kinesis Source",
                         TypeInformation.of(String.class)
                 );
-
-        // 7. Convertir JSON a objetos StockQuote
         DataStream<StockQuote> stockQuotes =
                 rawEvents
                         .map(StockQuoteParser::parse)
                         .returns(TypeInformation.of(StockQuote.class));
 
-        // 8. Configurar Event Time y Watermarks
         DataStream<StockQuote> quotesWithWatermarks =
                 stockQuotes.assignTimestampsAndWatermarks(
                         WatermarkStrategy
@@ -106,7 +97,6 @@ public class StockLakehouseJob {
                                 )
                 );
 
-        // 9. Agrupar por ticker y procesar ventanas de un minuto
         DataStream<StockAggregate> aggregates =
                 quotesWithWatermarks
                         .keyBy(StockQuote::getTicker)
@@ -120,7 +110,6 @@ public class StockLakehouseJob {
                                 new StockWindowFunction()
                         );
 
-        // 10. Crear la tabla Iceberg si todavía no existe
         TableLoader tableLoader =
                 IcebergTableManager.createTableIfNotExists(
                         awsRegion,
@@ -128,22 +117,18 @@ public class StockLakehouseJob {
                         glueDatabase
                 );
 
-        // 11. Convertir las agregaciones a RowData
         DataStream<RowData> icebergRows =
                 aggregates
                         .map(new StockAggregateToRowDataMapper())
                         .returns(TypeInformation.of(RowData.class));
 
-        // 12. Escribir las agregaciones en Iceberg
         FlinkSink.forRowData(icebergRows)
                 .tableLoader(tableLoader)
                 .append();
 
-        // 13. Ejecutar el pipeline
         env.execute("Stock Lakehouse Job");
     }
 
-    // Obtener una propiedad obligatoria de la configuración
     private static String getRequiredProperty(
             Properties properties,
             String propertyName

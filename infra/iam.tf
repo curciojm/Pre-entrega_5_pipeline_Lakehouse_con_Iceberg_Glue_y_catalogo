@@ -107,7 +107,6 @@ resource "aws_iam_role_policy" "flink_permissions" {
         ]
       },
 
-      # 6. Permisos para consultar los grupos de CloudWatch
       {
         Sid    = "CloudWatchDescribeLogGroups"
         Effect = "Allow"
@@ -119,7 +118,6 @@ resource "aws_iam_role_policy" "flink_permissions" {
         Resource = "*"
       },
 
-      # 7. Permisos para consultar los streams de logs
       {
         Sid    = "CloudWatchDescribeLogStreams"
         Effect = "Allow"
@@ -131,7 +129,6 @@ resource "aws_iam_role_policy" "flink_permissions" {
         Resource = "${aws_cloudwatch_log_group.flink.arn}:log-stream:*"
       },
 
-      # 8. Permisos para escribir en el stream de logs
       {
         Sid    = "CloudWatchPutLogEvents"
         Effect = "Allow"

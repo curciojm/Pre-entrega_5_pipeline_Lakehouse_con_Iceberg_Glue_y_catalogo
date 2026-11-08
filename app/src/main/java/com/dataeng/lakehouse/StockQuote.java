@@ -3,22 +3,14 @@ package com.dataeng.lakehouse;
 
 import java.io.Serializable;
 
-/**
- * Represents an individual stock quote received from Kinesis.
- * public permite acceder a la clase del resto de la app, private lo contrario
- * getter y setter perimten consultar los atributos de una clase. getter devuelve el valor de price
- * setter establece un valor
- * el codigo hace que cada cotización que recibimos de Kinesis dentro de nuestra aplicación Java
- */ 
 public class StockQuote implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private String ticker;
     private double price;
-    private long eventTime; // long asigna 64 bits a difrencia de int. para datos id largos la vamos a necesitar son 9 trillones aprox
+    private long eventTime;
 
-    // Required by Flink for POJO serialization
     public StockQuote() {
     }
 

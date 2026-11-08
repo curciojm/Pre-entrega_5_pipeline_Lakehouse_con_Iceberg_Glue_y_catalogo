@@ -1,5 +1,3 @@
-# outputs.tf: exponer información de los recursos creados por Terraform, para que podamos consultarla o utilizarla desde otros módulos y configuraciones
-# terraform output para chequear las salidas declaradas
 output "kinesis_stream_name" {
   description = "Nombre del Kinesis Data Stream."
   value       = aws_kinesis_stream.stock_quotes.name

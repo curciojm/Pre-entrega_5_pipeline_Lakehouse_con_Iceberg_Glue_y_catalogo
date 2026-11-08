@@ -10,7 +10,6 @@ provider "aws" {
   }
 }
 
-# Provider sin tags automáticos para Managed Flink
 provider "aws" {
   alias  = "untagged"
   region = var.aws_region
