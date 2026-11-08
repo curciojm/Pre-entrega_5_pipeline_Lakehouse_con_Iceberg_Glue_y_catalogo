@@ -1,0 +1,13 @@
+# AWS configuration
+aws_region  = "us-east-2"
+environment = "dev"
+
+# Kinesis
+kinesis_stream_name = "dev-kinesis-lakehouse-stream"
+
+# S3 buckets
+flink_artifact_bucket_name = "REPLACE_WITH_ARTIFACT_BUCKET_NAME"
+lakehouse_bucket_name       = "REPLACE_WITH_LAKEHOUSE_BUCKET_NAME"
+
+# Flink application
+flink_jar_path = "../app/target/stock-lakehouse.jar"

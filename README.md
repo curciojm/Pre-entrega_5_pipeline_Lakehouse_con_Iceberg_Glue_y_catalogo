@@ -4,7 +4,7 @@
 
 Implementación de un pipeline de procesamiento de datos financieros en tiempo real utilizando AWS Kinesis Data Streams, Apache Flink, Apache Iceberg y AWS Glue Data Catalog.
 
-El sistema recibe cotizaciones bursátiles, calcula agregaciones por ticker en ventanas de un minuto y almacena los resultados en formato Parquet sobre Amazon S3, utilizando Iceberg como formato de tabla.
+El sistema recibe cotizaciones bursátiles generadas mediante un producer en Python, calcula agregaciones por ticker en ventanas de un minuto y almacena los resultados en formato Parquet sobre Amazon S3, utilizando Iceberg como formato de tabla.
 
 ## Arquitectura
 
@@ -57,13 +57,18 @@ Pre-entrega_5_pipeline_Lakehouse_con_Iceberg_Glue_y_catalogo/
 │
 ├── app/
 │   ├── src/
-│   ├── producer.py
 │   └── pom.xml
 │
 ├── infra/
 │   ├── *.tf
-│   └── terraform.tfvars
+│   └── terraform.tfvars.example
 │
+├── producer/
+│   └── producer.py
+│
+├── evidencia/
+│
+├── .gitignore
 └── README.md
 ```
 
@@ -80,6 +85,7 @@ Cada evento contiene:
 Los eventos se envían a Kinesis mediante `put_records`, utilizando el ticker como partition key.
 
 Configuración de generación:
+
 - 20 eventos por lote.
 - Intervalo de 2 segundos entre lotes.
 
@@ -91,13 +97,15 @@ Instalar dependencias:
 pip install boto3
 ```
 
-Configurar las credenciales AWS mediante el perfil local o variables de entorno.
+Configurar las credenciales AWS mediante un perfil local o variables de entorno.
 
-Ejecutar:
+Ejecutar desde la carpeta raíz del proyecto:
 
 ```bash
-python producer.py
+python producer/producer.py
 ```
+
+Presionar `Ctrl+C` para detener el producer.
 
 ## Procesamiento con Flink
 
@@ -113,6 +121,8 @@ La aplicación Java consume eventos desde Kinesis y realiza:
    - Precio promedio (`avg_price`).
    - Precio máximo (`max_price`).
    - Precio mínimo (`min_price`).
+
+La aplicación se ejecuta mediante AWS Managed Service for Apache Flink.
 
 ## Almacenamiento con Iceberg
 
@@ -155,9 +165,31 @@ ORDER BY ticker;
 
 ## Infraestructura
 
-La infraestructura AWS se administra mediante Terraform.
+La infraestructura AWS se administra mediante Terraform y utiliza la región `us-east-2`.
 
-Para inicializar y revisar los cambios:
+### Configuración inicial
+
+Desde la carpeta `infra`, crear el archivo local de variables a partir del ejemplo:
+
+```bash
+cp terraform.tfvars.example terraform.tfvars
+```
+
+Revisar los nombres de los buckets y configurar valores únicos disponibles en AWS.
+
+### Compilación de la aplicación
+
+Desde la carpeta `app`:
+
+```bash
+mvn clean package
+```
+
+El JAR generado se utiliza como artefacto de la aplicación Flink.
+
+### Despliegue
+
+Desde la carpeta `infra`:
 
 ```bash
 terraform init
@@ -165,15 +197,15 @@ terraform plan
 terraform apply
 ```
 
-La infraestructura utiliza la región `us-east-2`.
-
-Para eliminar los recursos:
+### Destrucción de recursos
 
 ```bash
 terraform destroy
 ```
 
-**Importante:** la destrucción de la infraestructura elimina los recursos administrados por Terraform. El bucket de datos está configurado para permitir su eliminación aunque contenga objetos.
+**Importante:** la destrucción elimina los recursos administrados por Terraform. Los buckets S3 tienen configurado `force_destroy = false` para evitar su eliminación automática cuando contienen objetos. Es necesario vaciarlos antes de destruirlos.
+
+El archivo `terraform.tfvars` contiene la configuración local y no se incluye en el repositorio. Se proporciona `terraform.tfvars.example` como plantilla.
 
 ## Validación
 
@@ -181,6 +213,7 @@ El funcionamiento del pipeline se verifica mediante:
 
 - Recepción de eventos en Kinesis.
 - Ejecución de la aplicación Managed Flink.
+- Procesamiento de cotizaciones y agregaciones por ventanas.
 - Creación de la tabla en Glue Data Catalog.
 - Escritura de datos y snapshots de Iceberg en S3.
 - Consultas SQL sobre las agregaciones mediante Athena.
